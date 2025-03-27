@@ -1,0 +1,10 @@
+{
+    "C_Cpp.errorSquiggles": "enabled",
+    "files.associations": {
+        "stdlib.h": "c",
+        "stdio.h": "c",
+        "gtk.h": "c",
+        "gdk-pixbuf.h": "c",
+        "tresor_functions.h": "c"
+    }
+}
