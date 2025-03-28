@@ -5,14 +5,22 @@
 
 #include "tresor_functions.h"
 
+
+//global
 unsigned a;
-struct wich_chest_contain_gold{
-    unsigned int gold;
-};
+unsigned score_victory;
+unsigned score_lose ;
+char score_string[45];
+unsigned short chest1_oppened = 0;
+unsigned short chest2_oppened = 0;
+unsigned short chest3_oppened = 0;
+unsigned short empty_chest = 0;
+unsigned short round_end = 0;
+
+GtkButton *restart;
 
 
-
-
+/*************functions*************/
 GtkButton *charge_image_bouton() {
     // 1a. Load the image
     GdkPixbuf *pb_temp = gdk_pixbuf_new_from_file("Images/img1.jpg", NULL);
@@ -65,20 +73,22 @@ int generate_box_and_button(GtkWidget *window, unsigned a){
     GtkWidget *button1 = charge_image_bouton(); // Unlabeled button
     GtkWidget *button2 = charge_image_bouton();
     GtkWidget *button3 = charge_image_bouton();
-    GtkWidget *restart = gtk_button_new_with_label("restart");
     GtkWidget *text_label = gtk_label_new("Choisisez un coffre!");
-    char score_string[45];
-    unsigned score_victory = 0;
-    unsigned score_lose = 0;
+    restart = GTK_BUTTON(gtk_button_new_with_label("restart"));
+
+
     sprintf(score_string, "Victoires: %u Défaites: %u ", score_victory, score_lose);
     GtkWidget *score_label = gtk_label_new(score_string);
 
-    button_action(button1,button2,button3,restart);
+    button_action(button1,button2,button3,restart,score_label);
 
     if ((button1 ||button2 || button3) == NULL) {
         printf("Erreur lors de la création des bouton \n");
         return -1;
     }
+
+
+    GTK_LABEL(text_label);
     gtk_box_pack_start(GTK_BOX(chest_box), button1, TRUE, TRUE, 0);
     gtk_box_pack_start(GTK_BOX(chest_box), button2, TRUE, TRUE, 0);
     gtk_box_pack_start(GTK_BOX(chest_box), button3, TRUE, TRUE, 0);
@@ -93,49 +103,97 @@ int generate_box_and_button(GtkWidget *window, unsigned a){
     gtk_box_pack_start(GTK_BOX(main_box), chest_box, TRUE, TRUE, 0);
 
     gtk_container_add(GTK_CONTAINER(window), main_box);
-
     
-
+    update_score_label_and_reset_state(score_label,restart);
     gtk_widget_show_all(window);
 }
 
 
-int button1_clicked(GtkWidget *widget, gpointer data){
-    if(a==0){
-    fprintf(stderr,"button1");
-        return 1;
+void update_score_label_and_reset_state(GtkLabel *score_label,GtkWidget *restart) {
+    if(empty_chest == 2){
+        ++score_lose;
+        empty_chest = 0;
+        round_end =1;
     }
-    else return -1;
-
+    sprintf(score_string, "Victoires: %u Défaites: %u ", score_victory, score_lose);
+    gtk_label_set_text(score_label, score_string);
+    if(round_end){
+        gtk_widget_set_sensitive ( restart , TRUE );
+    }
+    else gtk_widget_set_sensitive ( restart , FALSE );
 }
 
-int button2_clicked(GtkWidget *widget, gpointer data){
-  
-    if(a==1){
-    fprintf(stderr,"button2");
-        return 1;
+
+void button1_clicked(GtkWidget *widget, gpointer data){
+    unsigned oppened = 0;
+    if (a==0 && !chest1_oppened && !round_end){
+        chest1_oppened=1;
+        ++score_victory;
+        round_end=1;
+        fprintf(stderr, "Button 1 clicked\n");
     }
-    else return -1;
-    
+    else if (!chest1_oppened && !round_end){
+        chest1_oppened=1;
+        ++empty_chest;
+    }
+
+    GtkLabel *score_label = GTK_LABEL(data); 
+    update_score_label_and_reset_state(score_label,restart);
+}
+
+
+int button2_clicked(GtkWidget *widget, gpointer data){
+    unsigned oppened = 0;
+    if(a==1 && !chest2_oppened && !round_end){
+        chest2_oppened=1;
+        ++score_victory;
+        round_end=1;
+        fprintf(stderr, "Button 2 clicked\n");
+    }
+    else if (!chest2_oppened && !round_end) {
+        ++empty_chest; 
+        chest2_oppened=1; 
+    }
+
+    GtkLabel *score_label = GTK_LABEL(data); 
+    update_score_label_and_reset_state(score_label,restart);
 }
 
 int button3_clicked(GtkWidget *widget, gpointer data){
-    if(a==2){
-    fprintf(stderr,"button3");
-        return 1;
+    if(a==2 && !chest3_oppened && !round_end){
+        chest3_oppened=1;
+        ++score_victory;
+        round_end =1;
+        fprintf(stderr, "Button 3 clicked\n");
     }
-    else return -1;
+    else if (!chest3_oppened && !round_end) {
+        ++empty_chest;
+        chest3_oppened=1;
+    }
+
+    GtkLabel *score_label = GTK_LABEL(data); 
+    update_score_label_and_reset_state(score_label,restart);
+}
+
+
+int reset_clicked(GtkWidget *widget, gpointer data) {
+    chest3_oppened = 0;
+    chest2_oppened = 0;
+    chest1_oppened = 0;
+    empty_chest = 0;
+    round_end = 0;
+    chest_randomizer();
+    gtk_widget_set_sensitive ( restart , FALSE );
+    fprintf(stderr,"reset\n");
+    return a;
     
 }
-void reset_clicked(GtkWidget *widget, gpointer data) {
-    fprintf(stderr,"reset");
-}
 
 
-int button_action(GtkWidget *button1, GtkWidget *button2, GtkWidget *button3, GtkWidget *restart){
-    g_signal_connect(button1, "clicked", G_CALLBACK(button1_clicked), GINT_TO_POINTER(a));
-    g_signal_connect(button2, "clicked", G_CALLBACK(button2_clicked),GINT_TO_POINTER(a) );
-    g_signal_connect(button3, "clicked", G_CALLBACK(button3_clicked), GINT_TO_POINTER(a));
+int button_action(GtkWidget *button1, GtkWidget *button2, GtkWidget *button3, GtkWidget *restart, GtkWidget *score_label){
+    g_signal_connect(button1, "clicked", G_CALLBACK(button1_clicked), (score_label));
+    g_signal_connect(button2, "clicked", G_CALLBACK(button2_clicked),score_label );
+    g_signal_connect(button3, "clicked", G_CALLBACK(button3_clicked), score_label);
     g_signal_connect(restart, "clicked", G_CALLBACK(reset_clicked),NULL);
 }
 
