@@ -18,6 +18,12 @@ typedef struct {
     unsigned short round_end;
 } Chest_var;
 
+typedef struct {
+    GtkWidget *button1;
+    GtkWidget *button2;
+    GtkWidget *button3;
+} Chest_button;
+
 Chest_var *chest_initialisation();
 
 #endif

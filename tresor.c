@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+
 #include "tresor_functions.h"
 
 
@@ -19,7 +20,10 @@ int main(int argc, char *argv[]) {
     g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
 
     //UI generation
-    generate_box_and_button(window);    
+    if (generate_box_and_button(window) == -1){
+        fprintf(stderr,"error while alocating memory, please retry");
+        exit(EXIT_FAILURE);
+    }
 
     //gtk main (loop)
     gtk_main();
