@@ -28,6 +28,9 @@ $(OBJDIR)/%.o: %.c
 $(OBJDIR)/tresor.o: tresor.c tresor_functions.h
 $(OBJDIR)/tresor_functions.o: tresor_functions.c tresor_functions.h
 
+doc:
+	@doxygen Doxyfile
+
 .PHONY: clean
 clean:
 	rm -rf $(OBJDIR) $(TARGET)
