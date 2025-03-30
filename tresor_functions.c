@@ -13,22 +13,15 @@ unsigned score_victory = 0;
 unsigned score_lose = 0;
 char score_string[45];
 Chest_var *chest = NULL; 
+Chest_button *chest_button = NULL;
 GtkButton *restart;
 
 
 /**********Functions**************/ 
 GtkButton *charge_image_bouton() {
     GdkPixbuf *pb_temp=NULL;
-    if(chest->chest1_oppened == 0){
-        pb_temp = gdk_pixbuf_new_from_file("Images/img1.jpg", NULL);
-    }
-    else if(chest->chest1_oppened == 1){
-        pb_temp = gdk_pixbuf_new_from_file("Images/img2.jpg", NULL);
-    }
-    else
-    {
-        pb_temp = gdk_pixbuf_new_from_file("Images/img3.jpg", NULL);
-    }
+
+    pb_temp = gdk_pixbuf_new_from_file("Images/img1.jpg", NULL);
     
 
     if (pb_temp == NULL) {
@@ -123,6 +116,7 @@ int update_button_image(GtkWidget *widget,unsigned short chest_state){
     } else {
         printf("Could not load the image, please check the that the directory is correct\n");
     }}
+
 // Button click functions
 void button1_clicked(GtkWidget *widget, gpointer data) {
     GtkLabel *score_label = GTK_LABEL(data);
@@ -215,11 +209,21 @@ int chest_randomizer() {
     return a;
 }
 
+void program_exit(GtkWidget *window, gpointer data){
+    if(chest)
+        free(chest);
+    if(chest_button)
+        free(chest_button);
+
+    gtk_widget_destroy(window);
+    gtk_main_quit();
+    return NULL;
+}
 
 int generate_box_and_button(GtkWidget *window, unsigned a) {
     chest = chest_initialisation(); 
     if (!chest) return -1;
-    Chest_button *chest_button =(Chest_button *)malloc(sizeof(Chest_button));
+    chest_button =(Chest_button *)malloc(sizeof(Chest_button));
 
 
 
