@@ -5,30 +5,41 @@
 
 
 
-int main(int argc, char *argv[]){
-
-    chest_randomizer();
-    
-    //gtk part
+int main(int argc, char *argv[]) {
     gtk_init(&argc, &argv);
 
+    GameState *state = malloc(sizeof(GameState));
+    if (!state) exit(EXIT_FAILURE);
 
-    //window defininition and atributes
+    state->chest_index = chest_randomizer();
+    state->score_victory = 0;
+    state->score_lose = 0;
+    state->chest = NULL;
+    state->chest_button = NULL;
+    state->restart = NULL;
+    state->etape_jeu = 0;
+    state->choix_joueur_initial = -1;
+    state->coffre_ouvert_par_jack = -1;
+
     GtkWidget *window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     gtk_window_set_title(GTK_WINDOW(window), "Chasse aux trésor");
-    gtk_window_set_default_size(GTK_WINDOW(window), 400, 300);
-    g_signal_connect(window, "destroy", G_CALLBACK(program_exit), NULL);
+    gtk_window_set_default_size(GTK_WINDOW(window), window_width, window_height);
+    g_signal_connect(window, "destroy", G_CALLBACK(program_exit), state);
 
-    //UI generation
-    if (generate_box_and_button(window) == -1){
-        GTK_BUTTONS_CLOSE, GTK_DIALOG_DESTROY_WITH_PARENT;
-        fprintf(stderr,"error while alocating memory, please retry");
-        exit(EXIT_FAILURE);
+    switch (generate_box_and_button(window, state)) {
+        case -1:
+            fprintf(stderr, "Error allocating memory for the chest.\n");
+            free(state);
+            exit(EXIT_FAILURE);
+        case -2:
+            fprintf(stderr, "Error loading image for the button.\n");
+            free(state);
+            exit(EXIT_FAILURE);
+        default:
+            break;
     }
 
-    //gtk main (loop)
     gtk_main();
-    
     return 0;
 }
 

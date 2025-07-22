@@ -3,7 +3,8 @@
 
 #include <gtk/gtk.h>
 
-
+#define window_width 400
+#define window_height 300
 
 typedef struct {
     GtkWidget *score_label;
@@ -19,6 +20,19 @@ typedef struct {
     GtkWidget *button2;
     GtkWidget *button3;
 } Chest_button;
+
+typedef struct {
+    unsigned chest_index;
+    unsigned score_victory;
+    unsigned score_lose;
+    char score_string[45];
+    Chest_var *chest;
+    Chest_button *chest_button;
+    GtkButton *restart;
+    int etape_jeu;
+    int choix_joueur_initial;
+    int coffre_ouvert_par_jack;
+} GameState;
 
 
 // Functions declaration
@@ -79,7 +93,7 @@ void reset_chest_values(Chest_var *chest);
  * @pre: score_label != NULL, restart != NULL
  * @post: the score_label text is updated, the restart button is enabled or disabled
  */
-void update_score_label_and_reset_state(GtkLabel *score_label, GtkWidget *restart);
+void update_score_label_and_reset_state(GtkLabel *score_label, GtkWidget *restart, GameState *state);
 
 /**
  * update_button_image
@@ -149,7 +163,7 @@ void button3_clicked(GtkWidget *widget, gpointer data);
  * @return: a random number between 0, 1 or 2
  *
  * @pre: srand should be called beforehand for randomness
- * @post: the chest index (a) is updated
+ * @post: the chest index (chest_index) is updated
  */
 int chest_randomizer();
 
@@ -185,7 +199,7 @@ void reset_clicked(GtkWidget *widget, gpointer data);
  * create and set up the UI for the game
  *
  * @param: window the main application window is to contain the UI
- * @param: a the index of the chest containing the treasure
+ * @param: a pointer to GtkWidget window
  *
  * @return:
  *    -0 if the UI is successfully created.
@@ -194,7 +208,7 @@ void reset_clicked(GtkWidget *widget, gpointer data);
  * @pre: window != NULL.
  * @post: the UI components are added to the window and initialized
  */
-int generate_box_and_button(GtkWidget *window, unsigned a);
+int generate_box_and_button(GtkWidget *window, GameState *state);
 
 
 #endif
