@@ -17,13 +17,13 @@ int main(int argc, char *argv[]) {
     state->chest = NULL;
     state->chest_button = NULL;
     state->restart = NULL;
-    state->etape_jeu = 0;
-    state->choix_joueur_initial = -1;
-    state->coffre_ouvert_par_jack = -1;
+    state->game_step = 0;
+    state->initial_player_choice = -1;
+    state->chest_oppened_by_ghost = -1;
 
     GtkWidget *window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     gtk_window_set_title(GTK_WINDOW(window), "Chasse aux trésor");
-    gtk_window_set_default_size(GTK_WINDOW(window), window_width, window_height);
+    gtk_window_set_default_size(GTK_WINDOW(window), WINDOW_WIDTH, WINDOW_HEIGHT);
     g_signal_connect(window, "destroy", G_CALLBACK(program_exit), state);
 
     switch (generate_box_and_button(window, state)) {

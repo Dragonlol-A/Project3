@@ -3,8 +3,8 @@
 
 #include <gtk/gtk.h>
 
-#define window_width 400
-#define window_height 300
+#define WINDOW_WIDTH 400
+#define WINDOW_HEIGHT 300
 
 typedef struct {
     GtkWidget *score_label;
@@ -29,9 +29,9 @@ typedef struct {
     Chest_var *chest;
     Chest_button *chest_button;
     GtkButton *restart;
-    int etape_jeu;
-    int choix_joueur_initial;
-    int coffre_ouvert_par_jack;
+    int game_step;
+    int initial_player_choice;
+    int chest_oppened_by_ghost;
 } GameState;
 
 

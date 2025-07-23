@@ -7,6 +7,9 @@
 
 #define IMAGE_WIDTH 100
 #define IMAGE_HEIGHT 100
+#define CLOSED_CHEST "Images/img1.jpg"
+#define EMPTY_CHEST "Images/img2.jpg"
+#define TRESURE_CHEST "Images/img3.jpg"
 
 
 
@@ -15,7 +18,7 @@
 GtkButton *charge_image_bouton() {
     GdkPixbuf *pb_temp=NULL;
 
-    pb_temp = gdk_pixbuf_new_from_file("Images/img1.jpg", NULL);
+    pb_temp = gdk_pixbuf_new_from_file(CLOSED_CHEST, NULL);
     
 
     if (pb_temp == NULL) {
@@ -36,6 +39,7 @@ GtkButton *charge_image_bouton() {
         g_object_unref(pb);
         return NULL;
     }
+    
 
     GtkWidget *image = gtk_image_new_from_pixbuf(pb);
     g_object_unref(pb); 
@@ -49,7 +53,6 @@ Chest_var *chest_initialisation() {
     Chest_var *created_chest = (Chest_var *)malloc(sizeof(Chest_var));
     if (created_chest == NULL) {
         free(created_chest);
-        fprintf(stderr, "Erreur d'allocation mémoire pour le coffre.\n");
         return NULL;
     }
 
@@ -75,6 +78,8 @@ void reset_chest_values(Chest_var *chest) {
 // Function to update the score label and lock or unlock the restart button
 void update_score_label_and_reset_state(GtkLabel *score_label, GtkWidget *restart, GameState *state) {
     if (state->chest->empty_chest == 2) {
+        sprintf(state->chest->score_label, "Victoires: %u Défaites: %u", state->score_victory, state->score_lose);
+        gtk_label_set_text(score_label, state->score_string);
         state->score_lose++;
         state->chest->empty_chest = 0;
         state->chest->round_end = 1;
@@ -82,6 +87,8 @@ void update_score_label_and_reset_state(GtkLabel *score_label, GtkWidget *restar
 
     sprintf(state->score_string, "Victoires: %u Défaites: %u", state->score_victory, state->score_lose);
     gtk_label_set_text(score_label, state->score_string);
+
+
 
     if (state->chest->round_end)
         gtk_widget_set_sensitive(restart, TRUE);
@@ -93,11 +100,11 @@ void update_score_label_and_reset_state(GtkLabel *score_label, GtkWidget *restar
 int update_button_image(GtkWidget *widget,unsigned short chest_state){
     GdkPixbuf *pixbuf;
     if(chest_state==1)
-        pixbuf = gdk_pixbuf_new_from_file("Images/img3.jpg", NULL);
+        pixbuf = gdk_pixbuf_new_from_file(TRESURE_CHEST, NULL);
     else if(chest_state==2)
-        pixbuf = gdk_pixbuf_new_from_file("Images/img2.jpg", NULL);
+        pixbuf = gdk_pixbuf_new_from_file(EMPTY_CHEST, NULL);
     else 
-        pixbuf = gdk_pixbuf_new_from_file("Images/img1.jpg", NULL);
+        pixbuf = gdk_pixbuf_new_from_file(CLOSED_CHEST, NULL);
     if (pixbuf) {
         GdkPixbuf *scaled_pixbuf = gdk_pixbuf_scale_simple(pixbuf, IMAGE_WIDTH, IMAGE_HEIGHT, GDK_INTERP_BILINEAR);
         g_object_unref(pixbuf);
@@ -110,9 +117,15 @@ int update_button_image(GtkWidget *widget,unsigned short chest_state){
     }}
 
 // Button click functions
+void jack_chest_oppener(GtkWidget *widget, gpointer data){
+
+}
+
 void button1_clicked(GtkWidget *widget, gpointer data) {
     GameState *state = (GameState *)data;
     GtkLabel *score_label = GTK_LABEL(state->chest->score_label);
+
+    if (state->game_step==0) jack_chest_oppener(widget, data);
 
     if (state->chest_index == 0 && !state->chest->chest1_oppened && !state->chest->round_end) {
         state->chest->chest1_oppened = 1;
@@ -212,6 +225,9 @@ void program_exit(GtkWidget *window, gpointer data) {
 
 int generate_box_and_button(GtkWidget *window, GameState *state) {
     state->chest = chest_initialisation();
+    
+    if(state->chest==NULL) return -1;
+
     state->chest_button = malloc(sizeof(Chest_button));
 
     GtkWidget *main_box = gtk_vbox_new(FALSE, 10);
@@ -223,7 +239,10 @@ int generate_box_and_button(GtkWidget *window, GameState *state) {
     state->chest_button->button1 = GTK_WIDGET(charge_image_bouton());
     state->chest_button->button2 = GTK_WIDGET(charge_image_bouton());
     state->chest_button->button3 = GTK_WIDGET(charge_image_bouton());
-    GtkWidget *text_label = gtk_label_new("Choisisez un coffre!");
+
+    if((!state->chest_button->button1||!state->chest_button->button2||!state->chest_button->button3)) return -2;
+
+    GtkWidget *state_label = gtk_label_new("Choisisez un coffre!");
     state->restart = GTK_BUTTON(gtk_button_new_with_label("Restart"));
 
     sprintf(state->score_string, "Victoires: %u Défaites: %u", state->score_victory, state->score_lose);
@@ -236,7 +255,7 @@ int generate_box_and_button(GtkWidget *window, GameState *state) {
     gtk_box_pack_start(GTK_BOX(chest_box), state->chest_button->button3, TRUE, TRUE, 0);
     gtk_box_pack_start(GTK_BOX(restart_box), GTK_WIDGET(state->restart), FALSE, TRUE, 0);
     gtk_box_pack_start(GTK_BOX(score_box), state->chest->score_label, FALSE, TRUE, 0);
-    gtk_box_pack_start(GTK_BOX(text_box), text_label, FALSE, TRUE, 0);
+    gtk_box_pack_start(GTK_BOX(text_box), state_label, FALSE, TRUE, 0);
 
     gtk_box_pack_start(GTK_BOX(main_box), score_box, FALSE, TRUE, 0);
     gtk_box_pack_start(GTK_BOX(main_box), text_box, FALSE, TRUE, 0);
