@@ -78,8 +78,7 @@ void reset_chest_values(Chest_var *chest) {
 // Function to update the score label and lock or unlock the restart button
 void update_score_label_and_reset_state(GtkLabel *score_label, GtkWidget *restart, GameState *state) {
     if (state->chest->empty_chest == 2) {
-        sprintf(state->chest->score_label, "Victoires: %u Défaites: %u", state->score_victory, state->score_lose);
-        gtk_label_set_text(score_label, state->score_string);
+
         state->score_lose++;
         state->chest->empty_chest = 0;
         state->chest->round_end = 1;
