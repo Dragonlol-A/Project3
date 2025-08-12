@@ -8,6 +8,7 @@
 
 typedef struct {
     GtkWidget *score_label;
+    GtkWidget *state_label;
     unsigned short chest1_oppened;
     unsigned short chest2_oppened;
     unsigned short chest3_oppened;
@@ -26,6 +27,7 @@ typedef struct {
     unsigned score_victory;
     unsigned score_lose;
     char score_string[45];
+    char state_string[30];
     Chest_var *chest;
     Chest_button *chest_button;
     GtkButton *restart;

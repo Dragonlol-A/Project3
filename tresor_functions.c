@@ -82,11 +82,12 @@ void update_score_label_and_reset_state(GtkLabel *score_label, GtkWidget *restar
         state->score_lose++;
         state->chest->empty_chest = 0;
         state->chest->round_end = 1;
+        sprintf(state->state_string, "Perdu!");
     }
-
+    
     sprintf(state->score_string, "Victoires: %u Défaites: %u", state->score_victory, state->score_lose);
     gtk_label_set_text(score_label, state->score_string);
-
+    gtk_label_set_text(state->chest->state_label, state->state_string);
 
 
     if (state->chest->round_end)
@@ -117,6 +118,51 @@ int update_button_image(GtkWidget *widget,unsigned short chest_state){
 
 // Button click functions
 void jack_chest_oppener(GtkWidget *widget, gpointer data){
+    GameState *state = (GameState *)data;
+    int player_choice = NULL;
+
+    if (widget == state->chest_button->button1) player_choice = 0;
+    else if (widget == state->chest_button->button2) player_choice = 1;
+    else if (widget == state->chest_button->button3) player_choice = 2;
+
+
+    int jack_chest = NULL;
+    for (int i = 0; i < 3; ++i) {
+        if (i == player_choice) continue;
+        if (i != state->chest_index) {
+            jack_chest = i;
+            break;
+        }
+    }
+
+    if (jack_chest == NULL) {
+        for (int i = 0; i < 3; ++i) {
+            if (i != player_choice) {
+                jack_chest = i;
+                break;
+            }
+        }
+    }
+
+    switch (jack_chest) {
+        case 0:
+            state->chest->chest1_oppened = 2;
+            state->chest->empty_chest++;
+            update_button_image(state->chest_button->button1, 2);
+            break;
+        case 1:
+            state->chest->chest2_oppened = 2;
+            state->chest->empty_chest++;
+            update_button_image(state->chest_button->button2, 2);
+            break;
+        case 2:
+            state->chest->chest3_oppened = 2;
+            state->chest->empty_chest++;
+            update_button_image(state->chest_button->button3, 2);
+            break;
+    }
+
+    state->game_step = 1;
 
 }
 
@@ -125,11 +171,13 @@ void button1_clicked(GtkWidget *widget, gpointer data) {
     GtkLabel *score_label = GTK_LABEL(state->chest->score_label);
 
     if (state->game_step==0) jack_chest_oppener(widget, data);
+    else{
 
     if (state->chest_index == 0 && !state->chest->chest1_oppened && !state->chest->round_end) {
         state->chest->chest1_oppened = 1;
         state->score_victory++;
         state->chest->round_end = 1;
+        sprintf(state->state_string, "Gagné!");
     } else if (!state->chest->chest1_oppened && !state->chest->round_end) {
         state->chest->chest1_oppened = 2;
         state->chest->empty_chest++;
@@ -141,16 +189,20 @@ void button1_clicked(GtkWidget *widget, gpointer data) {
     }
 
     update_score_label_and_reset_state(score_label, GTK_WIDGET(state->restart), state);
+    }
 }
 
 void button2_clicked(GtkWidget *widget, gpointer data) {
     GameState *state = (GameState *)data;
     GtkLabel *score_label = GTK_LABEL(state->chest->score_label);
 
+    if (state->game_step==0) jack_chest_oppener(widget, data);
+    else{
     if (state->chest_index == 1 && !state->chest->chest2_oppened && !state->chest->round_end ) {
         state->chest->chest2_oppened = 1;
         state->score_victory++;
         state->chest->round_end = 1;
+        sprintf(state->state_string, "Gagné!");
     } else if (!state->chest->chest2_oppened && !state->chest->round_end) {
         state->chest->chest2_oppened = 2;
         state->chest->empty_chest++;
@@ -161,16 +213,21 @@ void button2_clicked(GtkWidget *widget, gpointer data) {
         update_button_image(widget, chest_state);
     }
     update_score_label_and_reset_state(score_label, GTK_WIDGET(state->restart), state);
+    }
 }
 
 void button3_clicked(GtkWidget *widget, gpointer data) {
     GameState *state = (GameState *)data;
     GtkLabel *score_label = GTK_LABEL(state->chest->score_label);
 
+    if (state->game_step==0) jack_chest_oppener(widget, data);
+    else{
+
     if (state->chest_index == 2 && !state->chest->chest3_oppened && !state->chest->round_end) {
         state->chest->chest3_oppened = 1;
         state->score_victory++;
         state->chest->round_end = 1;
+        sprintf(state->state_string, "Gagné!");
     } else if (!state->chest->chest3_oppened && !state->chest->round_end) {
         state->chest->chest3_oppened = 2;
         state->chest->empty_chest++;
@@ -180,12 +237,16 @@ void button3_clicked(GtkWidget *widget, gpointer data) {
         update_button_image(widget, chest_state);
     }
     update_score_label_and_reset_state(score_label, GTK_WIDGET(state->restart), state);
+    }
 }
 
 void reset_clicked(GtkWidget *widget, gpointer data) {
     GameState *state = (GameState *)data;
     reset_chest_values(state->chest);
+    sprintf(state->state_string, "choisissez un coffre!");
+    gtk_label_set_text(state->chest->state_label, state->state_string);
     state->chest_index = chest_randomizer();
+    state->game_step = 0;
 
     update_button_image(state->chest_button->button1, 0);
     update_button_image(state->chest_button->button2, 0);
@@ -240,8 +301,10 @@ int generate_box_and_button(GtkWidget *window, GameState *state) {
     state->chest_button->button3 = GTK_WIDGET(charge_image_bouton());
 
     if((!state->chest_button->button1||!state->chest_button->button2||!state->chest_button->button3)) return -2;
-
-    GtkWidget *state_label = gtk_label_new("Choisisez un coffre!");
+    
+    sprintf(state->state_string, "Choisissez un coffre!");
+    state->chest->state_label = gtk_label_new(state->state_string);
+    
     state->restart = GTK_BUTTON(gtk_button_new_with_label("Restart"));
 
     sprintf(state->score_string, "Victoires: %u Défaites: %u", state->score_victory, state->score_lose);
@@ -254,7 +317,7 @@ int generate_box_and_button(GtkWidget *window, GameState *state) {
     gtk_box_pack_start(GTK_BOX(chest_box), state->chest_button->button3, TRUE, TRUE, 0);
     gtk_box_pack_start(GTK_BOX(restart_box), GTK_WIDGET(state->restart), FALSE, TRUE, 0);
     gtk_box_pack_start(GTK_BOX(score_box), state->chest->score_label, FALSE, TRUE, 0);
-    gtk_box_pack_start(GTK_BOX(text_box), state_label, FALSE, TRUE, 0);
+    gtk_box_pack_start(GTK_BOX(text_box), state->chest->state_label, FALSE, TRUE, 0);
 
     gtk_box_pack_start(GTK_BOX(main_box), score_box, FALSE, TRUE, 0);
     gtk_box_pack_start(GTK_BOX(main_box), text_box, FALSE, TRUE, 0);
